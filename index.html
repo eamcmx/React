@@ -15,204 +15,218 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Custom styles for shadcn components -->
     <style>
-        /* Add necessary shadcn component styles here */
+        /* Custom styles for our components */
         .card {
             background: white;
             border-radius: 0.5rem;
             box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-            padding: 1rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
         }
-        
+
         .switch {
             position: relative;
             display: inline-block;
-            width: 60px;
-            height: 34px;
+            width: 50px;
+            height: 24px;
+            background-color: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
-        
-        /* Add other necessary styles */
+
+        .switch.active {
+            background-color: #2196F3;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: white;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s;
+        }
+
+        .switch.active::after {
+            transform: translateX(26px);
+        }
+
+        .tabs {
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #64748b;
+        }
+
+        .tab.active {
+            color: #2196F3;
+            border-bottom: 2px solid #2196F3;
+        }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 p-4">
     <div id="root"></div>
     
     <script type="text/babel">
-        // Paste the entire LogicGateTeacher component code here
-        // (The code from the previous artifact)
-        import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+        const LogicGateTeacher = () => {
+            const [inputA, setInputA] = React.useState(false);
+            const [inputB, setInputB] = React.useState(false);
+            const [activeTab, setActiveTab] = React.useState('AND');
 
-const LogicGateTeacher = () => {
-  // State for input values
-  const [inputA, setInputA] = useState(false);
-  const [inputB, setInputB] = useState(false);
+            // Simplified Switch component
+            const Switch = ({ checked, onChange }) => (
+                <div 
+                    className={`switch ${checked ? 'active' : ''}`}
+                    onClick={() => onChange(!checked)}
+                />
+            );
 
-  // Logic gate operations
-  const gates = {
-    AND: (a, b) => a && b,
-    OR: (a, b) => a || b,
-    NOT: (a) => !a,
-    NAND: (a, b) => !(a && b),
-    NOR: (a, b) => !(a || b),
-    XOR: (a, b) => a !== b,
-    XNOR: (a, b) => a === b
-  };
+            const gates = {
+                AND: (a, b) => a && b,
+                OR: (a, b) => a || b,
+                NOT: (a) => !a,
+                NAND: (a, b) => !(a && b),
+                NOR: (a, b) => !(a || b),
+                XOR: (a, b) => a !== b,
+                XNOR: (a, b) => a === b
+            };
 
-  // Generate truth table data for the selected gate
-  const generateTruthTable = (gateName) => {
-    const rows = [];
-    const gateFunction = gates[gateName];
-    
-    if (gateName === 'NOT') {
-      rows.push({ a: false, output: gateFunction(false) });
-      rows.push({ a: true, output: gateFunction(true) });
-    } else {
-      rows.push({ a: false, b: false, output: gateFunction(false, false) });
-      rows.push({ a: false, b: true, output: gateFunction(false, true) });
-      rows.push({ a: true, b: false, output: gateFunction(true, false) });
-      rows.push({ a: true, b: true, output: gateFunction(true, true) });
-    }
-    
-    return rows;
-  };
+            const gateDescriptions = {
+                AND: "The AND gate outputs true (1) only when both inputs are true (1). Think of it like 'both conditions must be met'.",
+                OR: "The OR gate outputs true (1) when at least one input is true (1). Think of it like 'either condition can be met'.",
+                NOT: "The NOT gate inverts its input. It outputs true (1) when the input is false (0), and false (0) when the input is true (1).",
+                NAND: "The NAND gate is the opposite of AND. It outputs false (0) only when both inputs are true (1).",
+                NOR: "The NOR gate is the opposite of OR. It outputs true (1) only when both inputs are false (0).",
+                XOR: "The XOR (exclusive OR) gate outputs true (1) when inputs are different. Think of it like 'either but not both'.",
+                XNOR: "The XNOR gate outputs true (1) when inputs are the same. It's the opposite of XOR."
+            };
 
-  // Gate descriptions for educational content
-  const gateDescriptions = {
-    AND: "The AND gate outputs true (1) only when both inputs are true (1). Think of it like 'both conditions must be met'.",
-    OR: "The OR gate outputs true (1) when at least one input is true (1). Think of it like 'either condition can be met'.",
-    NOT: "The NOT gate inverts its input. It outputs true (1) when the input is false (0), and false (0) when the input is true (1).",
-    NAND: "The NAND gate is the opposite of AND. It outputs false (0) only when both inputs are true (1).",
-    NOR: "The NOR gate is the opposite of OR. It outputs true (1) only when both inputs are false (0).",
-    XOR: "The XOR (exclusive OR) gate outputs true (1) when inputs are different. Think of it like 'either but not both'.",
-    XNOR: "The XNOR gate outputs true (1) when inputs are the same. It's the opposite of XOR."
-  };
+            const generateTruthTable = (gateName) => {
+                const rows = [];
+                const gateFunction = gates[gateName];
+                
+                if (gateName === 'NOT') {
+                    rows.push({ a: false, output: gateFunction(false) });
+                    rows.push({ a: true, output: gateFunction(true) });
+                } else {
+                    rows.push({ a: false, b: false, output: gateFunction(false, false) });
+                    rows.push({ a: false, b: true, output: gateFunction(false, true) });
+                    rows.push({ a: true, b: false, output: gateFunction(true, false) });
+                    rows.push({ a: true, b: true, output: gateFunction(true, true) });
+                }
+                
+                return rows;
+            };
 
-  return (
-    <Card className="w-full max-w-4xl">
-      <CardHeader>
-        <CardTitle>Logic Gates Interactive Learning Tool</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="AND" className="w-full">
-          <TabsList className="grid grid-cols-7 w-full">
-            {Object.keys(gates).map(gate => (
-              <TabsTrigger key={gate} value={gate} className="text-sm">
-                {gate}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          {Object.keys(gates).map(gateName => (
-            <TabsContent key={gateName} value={gateName} className="space-y-6">
-              <div className="space-y-4">
-                {/* Gate Description */}
-                <div className="bg-slate-100 p-4 rounded-lg">
-                  <p className="text-sm">{gateDescriptions[gateName]}</p>
-                </div>
-
-                {/* Interactive Playground */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Interactive {gateName} Gate</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        {gateName !== 'NOT' && (
-                          <>
-                            <div className="flex items-center gap-2">
-                              <span>Input A:</span>
-                              <Switch
-                                checked={inputA}
-                                onCheckedChange={setInputA}
-                              />
-                              <span>{inputA ? '1' : '0'}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span>Input B:</span>
-                              <Switch
-                                checked={inputB}
-                                onCheckedChange={setInputB}
-                              />
-                              <span>{inputB ? '1' : '0'}</span>
-                            </div>
-                          </>
-                        )}
-                        {gateName === 'NOT' && (
-                          <div className="flex items-center gap-2">
-                            <span>Input:</span>
-                            <Switch
-                              checked={inputA}
-                              onCheckedChange={setInputA}
-                            />
-                            <span>{inputA ? '1' : '0'}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <span>Output:</span>
-                          <span className="font-bold">
-                            {gates[gateName](inputA, inputB) ? '1' : '0'}
-                          </span>
+            return (
+                <div className="max-w-4xl mx-auto">
+                    <div className="card">
+                        <h1 className="text-2xl font-bold mb-4">Logic Gates Interactive Learning Tool</h1>
+                        
+                        {/* Tabs */}
+                        <div className="tabs flex space-x-2">
+                            {Object.keys(gates).map(gate => (
+                                <button
+                                    key={gate}
+                                    className={`tab ${activeTab === gate ? 'active' : ''}`}
+                                    onClick={() => setActiveTab(gate)}
+                                >
+                                    {gate}
+                                </button>
+                            ))}
                         </div>
-                      </div>
+
+                        {/* Content */}
+                        <div className="mt-6">
+                            {/* Description */}
+                            <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                                <p>{gateDescriptions[activeTab]}</p>
+                            </div>
+
+                            {/* Interactive Section */}
+                            <div className="card">
+                                <h2 className="text-xl font-semibold mb-4">Interactive {activeTab} Gate</h2>
+                                <div className="flex items-center gap-6">
+                                    {activeTab !== 'NOT' ? (
+                                        <>
+                                            <div className="flex items-center gap-2">
+                                                <span>Input A:</span>
+                                                <Switch checked={inputA} onChange={setInputA} />
+                                                <span>{inputA ? '1' : '0'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span>Input B:</span>
+                                                <Switch checked={inputB} onChange={setInputB} />
+                                                <span>{inputB ? '1' : '0'}</span>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="flex items-center gap-2">
+                                            <span>Input:</span>
+                                            <Switch checked={inputA} onChange={setInputA} />
+                                            <span>{inputA ? '1' : '0'}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex items-center gap-2">
+                                        <span>Output:</span>
+                                        <span className="font-bold">
+                                            {gates[activeTab](inputA, inputB) ? '1' : '0'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Truth Table */}
+                            <div className="card">
+                                <h2 className="text-xl font-semibold mb-4">Truth Table</h2>
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="border-b">
+                                            {activeTab !== 'NOT' ? (
+                                                <>
+                                                    <th className="p-2 text-left">Input A</th>
+                                                    <th className="p-2 text-left">Input B</th>
+                                                </>
+                                            ) : (
+                                                <th className="p-2 text-left">Input</th>
+                                            )}
+                                            <th className="p-2 text-left">Output</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {generateTruthTable(activeTab).map((row, idx) => (
+                                            <tr key={idx} className="border-b">
+                                                {activeTab !== 'NOT' ? (
+                                                    <>
+                                                        <td className="p-2">{row.a ? '1' : '0'}</td>
+                                                        <td className="p-2">{row.b ? '1' : '0'}</td>
+                                                    </>
+                                                ) : (
+                                                    <td className="p-2">{row.a ? '1' : '0'}</td>
+                                                )}
+                                                <td className="p-2">{row.output ? '1' : '0'}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                  </CardContent>
-                </Card>
+                </div>
+            );
+        };
 
-                {/* Truth Table */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Truth Table</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <table className="w-full text-center">
-                      <thead>
-                        <tr className="border-b">
-                          {gateName !== 'NOT' && (
-                            <>
-                              <th className="p-2">Input A</th>
-                              <th className="p-2">Input B</th>
-                            </>
-                          )}
-                          {gateName === 'NOT' && (
-                            <th className="p-2">Input</th>
-                          )}
-                          <th className="p-2">Output</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {generateTruthTable(gateName).map((row, idx) => (
-                          <tr key={idx} className="border-b">
-                            {gateName !== 'NOT' && (
-                              <>
-                                <td className="p-2">{row.a ? '1' : '0'}</td>
-                                <td className="p-2">{row.b ? '1' : '0'}</td>
-                              </>
-                            )}
-                            {gateName === 'NOT' && (
-                              <td className="p-2">{row.a ? '1' : '0'}</td>
-                            )}
-                            <td className="p-2">{row.output ? '1' : '0'}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
-      </CardContent>
-    </Card>
-  );
-};
-
-export default LogicGateTeacher;
         // Render the component
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<LogicGateTeacher />);
